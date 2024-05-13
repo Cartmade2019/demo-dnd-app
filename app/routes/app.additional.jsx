@@ -5,36 +5,133 @@ import {
   Link,
   List,
   Page,
+  PageActions,
   Text,
+  Button,
   BlockStack,
+  Icon
+
 } from "@shopify/polaris";
 import {DndContext, KeyboardSensor, PointerSensor, TouchSensor, closestCorners, useSensor, useSensors} from "@dnd-kit/core";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Column } from "./components/Column/Column";
+import "./components/Column/Column.css";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { Input } from "./components/Input/Input";
+import {
+  CheckCircleIcon
+} from '@shopify/polaris-icons';
+import { Modal } from "./components/Modal/Modal";
+// import "./list.css";
 
 export default function AdditionalPage() {
-  const [tasks,setTasks] = useState([
-    {id:1,title:"Price",metakey:'price'},
-    {id:2,title:"Collection",metakey:'collection'},
-    {id:3,title:"Vendor",metakey:'vendor'},
-  ]);
+  // const [tasks,setTasks] = useState([
+  //   {id:1,title:"Price",metakey:'price'},
+  //   {id:2,title:"Collection",metakey:'collection'},
+  //   {id:3,title:"Vendor",metakey:'vendor'},
+  // ]);
 
-  const addTask = (title,metakey) => {
-    setTasks(prevtasks => [...prevtasks, {id:prevtasks.length+1,title:title,metakey:metakey}])
-    console.log('all tasks',...tasks)
+  const [filters,setFilters] = useState([]);
+  const [modalfilterid,setModalfilterid] = useState();
+  const [modalfiltertitle,setModalfiltertitle] = useState();
+  const [modalfiltermeta,setModalfiltermeta] = useState();
+    const [activefilters,setActivefilters] = useState([]);
+    const [activefiltersused,setActivefiltersused] = useState([]);
+    useEffect(() => {
+    const getmetafields = () => {
+        const requestOptions = {
+            method: "GET",
+            redirect: "follow"
+          };
+            
+            fetch("https://auto.searchalytics.com/search_auto_dashboard_shopify_backend/filters/send_all_metafields.php?shopify_store=flextread", requestOptions)
+            .then((response) => response.text())
+            .then((result) => {
+                 const data = JSON.parse(result);
+                const allMetafieldDefinitions = data.allMetafieldDefinitions;
+                console.log('result',result,"allMetafieldDefinitions",allMetafieldDefinitions);
+                setFilters([]);
+                setActivefilters([]);
+                
+                const activemetafilters = data.activeFilters;
+               
+                const newactiveFilters = activemetafilters.map((field, index) => ({
+                    id: 2000 + index, 
+                    title: field.name,
+                    metakey: field.custom_field_key,
+                    is_active: true
+                }));
+                setActivefilters(prevFilters=>[...prevFilters,...newactiveFilters]);
+                setFilters(prevFilters=>[...prevFilters,...newactiveFilters]);
+                
+                const newFilters = allMetafieldDefinitions
+                .filter(metafield => !activemetafilters.some(activeFilter => activeFilter.custom_field_key === metafield.key))
+                .map((metafield, index) => ({
+                  id: 3000 + index, 
+                  title: metafield.name,
+                  metakey: metafield.key,
+                  is_active: false
+              }));
+              
+              setFilters(prevFilters=>[...prevFilters,...newFilters]);
+              setActivefilters(prevFilters=>[...prevFilters,...newFilters]);
+            })
+            .catch((error) => console.error(error));
+    }
+    getmetafields();
+}, []); 
+const triggerModal = (filterId, newTitle) =>{
+  setModalfiltertitle(filterId);
+  setModalfilterid(newTitle);
+  document.getElementById("editmodal").show();
+}
+  const updateActiveFilterTitle = (filterId, newTitle) => {
+  
+    console.log('edit triggered',newTitle);
+    setActivefilters(prevFilters => {
+        return prevFilters.map(filter => {
+            if (filter.id === filterId) {
+                console.log(`Updating filter with ID ${filterId} to title ${newTitle}`);
+                return { ...filter, title: newTitle };
+            }else{
+              console.log(`Filter with ID ${filter.id} does not match ${filterId}, keeping unchanged`);
+              return filter;
+            }
+        });
+    });
+  };
+  const addTask = (id,title,metakey) => {
+    setFilters(prevTasks => {
+      return prevTasks.map(task => {
+          if (task.id === id) {
+              return { ...task, is_active: true };
+          }
+          // If the id doesn't match, return the task unchanged
+          return task;
+      });
+    });
+    setActivefilters(prevtasks => [...prevtasks, {id:id,title:title,metakey:metakey,is_active:true}])
+    
   }
-  const removeTask = title => {
-    console.log('all tasks',...tasks)
-    setTasks(tasks => tasks.filter(task => task.title !== title))
+  const removeTask = (id,title,metakey) => {
+    setFilters(prevTasks => {
+      return prevTasks.map(task => {
+          if (task.id === id) {
+              return { ...task, is_active: false };
+          }
+          // If the id doesn't match, return the task unchanged
+          return task;
+      });
+    });
+     setActivefilters(tasks => tasks.filter(task => task.metakey !== metakey));
   }
-  const getTaskPos = id => tasks.findIndex(task=>task.id===id);
+
+  const getTaskPos = id => activefilters.findIndex(task=>task.id===id);
   const handleDragEnd = event => {
     const {active,over} = event;
     if(active.id === over.id) return;
 
-    setTasks(tasks => {
+    setActivefilters(tasks => {
       const originalPos = getTaskPos(active.id);
       const newPos = getTaskPos(over.id);
 
@@ -49,15 +146,82 @@ export default function AdditionalPage() {
       coordinateGetter : sortableKeyboardCoordinates,
     }),
   );
+  const handleSave = () =>{
+    document.getElementById("save_success_modal").hide();
+  }
+  const handleSubmitData = () =>{
+    const dataToSend = {
+      store: "flextread",
+      activeCustomFields: []
+  }
+    console.log('submit trigger',activefilters);
+    activefilters.forEach((filter, index) => {
+        // Extract values from the filter object
+        const { id, title, metakey,is_active } = filter;
+        if(is_active){
+        // Create a new object with desired keys
+        const customField = {
+          custom_field_key: metakey,
+          custom_field_name: title,
+          hard_coded_or_dynamic : "dynamic",
+          sort_order: index + 1,
+          visibility: 1
+        };
+        // Append the customField object to activeCustomFields array
+        dataToSend.activeCustomFields.push(customField);
+      }
+
+    });
+    const myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    const raw = JSON.stringify(dataToSend);
+
+    const requestOptions = {
+      method: "POST",
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow"
+    };
+
+    console.log(requestOptions);
+
+  fetch("https://auto.searchalytics.com/search_auto_dashboard_shopify_backend/filters/save.php", requestOptions)
+    .then((response) => response.text())
+    .then((result) => {
+      console.log("resultresultresult",result);
+      document.getElementById("save_success_modal").show();
+    })
+    .catch((error) => console.error(error));
+
+  }
   return (
     <Page>
       <ui-title-bar title="Filters" />
       <Layout>
+      <Modal id="editmodal" title={modalfiltertitle}  ids={modalfilterid} metakey={modalfiltermeta} onEdit={updateActiveFilterTitle} />
        <DndContext sensors={sensors} onDragEnd={handleDragEnd} collisionDetection={closestCorners}>
-        <Input onSubmit={addTask}  />
-        <Column tasks={tasks} onRemove={removeTask}/>
+        <Input onSubmit={addTask}  filters={filters} activefilters={activefilters} />
+        <Column onRemove={removeTask} activefilters={activefilters} onEdit={updateActiveFilterTitle} triggerModal={triggerModal}/>
        </DndContext>
       </Layout>
+      
+      <ui-modal id="save_success_modal" variant="small" >
+            
+                <div className="success_message"> 
+          <Icon
+            source={CheckCircleIcon}
+            tone="base"
+            color="green"
+          /><span>Settings Saved</span></div>
+            <ui-title-bar title="Success">
+                <button onClick={handleSave}>OK</button>
+            </ui-title-bar>
+        </ui-modal>
+      <PageActions
+        primaryAction={<Button variant="primary" onBlur={handleSubmitData}>
+          Save</Button>}
+    />
     </Page>
   );
 }

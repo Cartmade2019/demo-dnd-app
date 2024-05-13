@@ -3,7 +3,7 @@
 client_id = "251bd1f080d3e8566e4fe283bfc7ab9f"
 name = "filters-test"
 handle = "filters-test"
-application_url = "https://effective-comp-gym-except.trycloudflare.com"
+application_url = "https://assembled-avi-motivated-profit.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://effective-comp-gym-except.trycloudflare.com/auth/callback",
-  "https://effective-comp-gym-except.trycloudflare.com/auth/shopify/callback",
-  "https://effective-comp-gym-except.trycloudflare.com/api/auth/callback"
+  "https://assembled-avi-motivated-profit.trycloudflare.com/auth/callback",
+  "https://assembled-avi-motivated-profit.trycloudflare.com/auth/shopify/callback",
+  "https://assembled-avi-motivated-profit.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

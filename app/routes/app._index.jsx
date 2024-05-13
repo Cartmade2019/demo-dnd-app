@@ -1,330 +1,253 @@
-import { useEffect } from "react";
-import { json } from "@remix-run/node";
-import { useActionData, useNavigation, useSubmit } from "@remix-run/react";
+
+
+
+
+import React, { useState, useEffect } from "react";
 import {
   Page,
-  Layout,
-  Text,
-  Card,
-  Button,
+  Checkbox,
   BlockStack,
-  Box,
-  List,
-  Link,
   InlineStack,
+  Button,
+  Select,
+  Divider,
+  Layout,
+  Spinner,
+  ChoiceList,
+  Card
 } from "@shopify/polaris";
-import { authenticate } from "../shopify.server";
 
-export const loader = async ({ request }) => {
-  await authenticate.admin(request);
+import './_index/styles.module.css';
 
-  return null;
-};
-
-export const action = async ({ request }) => {
-  const { admin } = await authenticate.admin(request);
-  const color = ["Red", "Orange", "Yellow", "Green"][
-    Math.floor(Math.random() * 4)
-  ];
-  const response = await admin.graphql(
-    `#graphql
-      mutation populateProduct($input: ProductInput!) {
-        productCreate(input: $input) {
-          product {
-            id
-            title
-            handle
-            status
-            variants(first: 10) {
-              edges {
-                node {
-                  id
-                  price
-                  barcode
-                  createdAt
-                }
-              }
-            }
-          }
-        }
-      }`,
-    {
-      variables: {
-        input: {
-          title: `${color} Snowboard`,
-        },
-      },
-    },
-  );
-  const responseJson = await response.json();
-  const variantId =
-    responseJson.data.productCreate.product.variants.edges[0].node.id;
-  const variantResponse = await admin.graphql(
-    `#graphql
-      mutation shopifyRemixTemplateUpdateVariant($input: ProductVariantInput!) {
-        productVariantUpdate(input: $input) {
-          productVariant {
-            id
-            price
-            barcode
-            createdAt
-          }
-        }
-      }`,
-    {
-      variables: {
-        input: {
-          id: variantId,
-          price: Math.random() * 100,
-        },
-      },
-    },
-  );
-  const variantResponseJson = await variantResponse.json();
-
-  return json({
-    product: responseJson.data.productCreate.product,
-    variant: variantResponseJson.data.productVariantUpdate.productVariant,
-  });
-};
 
 export default function Index() {
-  const nav = useNavigation();
-  const actionData = useActionData();
-  const submit = useSubmit();
-  const isLoading =
-    ["loading", "submitting"].includes(nav.state) && nav.formMethod === "POST";
-  const productId = actionData?.product?.id.replace(
-    "gid://shopify/Product/",
-    "",
-  );
+  
+  const [showCategoryImages, setShowCategoryImages] = useState(false);
+  const [hideProductsUntilSelected, setHideProductsUntilSelected] = useState(false);
+  const [showBrandInProductCards, setShowBrandInProductCards] = useState(false);
+  const [showReviewsInProductCards, setShowReviewsInProductCards] = useState(false);
+  const [showButtonsInProductCards, setShowButtonsInProductCards] = useState(false);
+  const [productsPerRow, setProductsPerRow] = useState("3");
+  const [productCardImageAspectRatio, setProductCardImageAspectRatio] = useState("default");
+  const [headerVehicleIcon, setHeaderVehicleIcon] = useState("garage");
 
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleChangeShowCategoryImages = () => setShowCategoryImages(!showCategoryImages);
+  const handleChangeHideProductsUntilSelected = () => setHideProductsUntilSelected(!hideProductsUntilSelected);
+  const handleChangeShowBrandInProductCards = () => setShowBrandInProductCards(!showBrandInProductCards);
+  const handleChangeShowReviewsInProductCards = () => setShowReviewsInProductCards(!showReviewsInProductCards);
+  const handleChangeShowButtonsInProductCards = () => setShowButtonsInProductCards(!showButtonsInProductCards);
+  const handleChangeInProductsPerRow = (value) => {setProductsPerRow(value)};
+  const handleChangeInProductCardImageAspectRatio = (value) => {setProductCardImageAspectRatio(value)};
+  const handleChangeInHeaderVehicleIcon = (value) => {setHeaderVehicleIcon(value)};
+ 
   useEffect(() => {
-    if (productId) {
-      shopify.toast.show("Product created");
+
+      const blockStacks = document.querySelectorAll('.Polaris-BlockStack--listReset');
+        blockStacks.forEach(blockStack => {
+          blockStack.style.flexDirection = 'row';
+          blockStack.style.marginTop = '-3px';
+          blockStack.querySelectorAll('li').forEach((li,index)=>{
+            if(index > 0)  {
+              li.style.marginLeft = '20px';
+            }
+          })
+      });
+
+      document.querySelectorAll('.choicelist-horizontal fieldset').forEach(fieldSet => {
+        fieldSet.style.marginTop = '5px'
+      })
+
+     fetch('https://auto.searchalytics.com/search_auto_dashboard_shopify_backend/send_general_settings.php')
+     .then(response => response.json())
+     .then(data => {
+        setShowCategoryImages(data?.showCategoryImages || showCategoryImages)
+        setHideProductsUntilSelected(data?.hideProductsUntilSelected || hideProductsUntilSelected)
+        setShowBrandInProductCards(data?.showBrandInProductCards || showBrandInProductCards )
+        setShowReviewsInProductCards(data?.showReviewsInProductCards || showReviewsInProductCards)
+        setShowButtonsInProductCards(data?.showButtonsInProductCards || showButtonsInProductCards)
+        setProductsPerRow(data?.productsPerRow || productsPerRow)
+        setProductCardImageAspectRatio(data?.productCardImageAspectRatio || productCardImageAspectRatio )
+        setHeaderVehicleIcon(data?.headerVehicleIcon || headerVehicleIcon)
+     });
+
+  }, []);
+
+  const sendDataToBackend = async () => {
+
+    setIsSaving(true);
+
+    const data = {
+
+      "showCategoryImages" : showCategoryImages,
+      "hideProductsUntilSelected": hideProductsUntilSelected,
+      "showBrandInProductCards": showBrandInProductCards,
+      "showReviewsInProductCards": showReviewsInProductCards,
+      "showButtonsInProductCards": showButtonsInProductCards,
+      "productsPerRow": productsPerRow,
+      "productCardImageAspectRatio": productCardImageAspectRatio,
+      "headerVehicleIcon": headerVehicleIcon
+
     }
-  }, [productId]);
-  const generateProduct = () => submit({}, { replace: true, method: "POST" });
+
+    fetch('https://auto.searchalytics.com/search_auto_dashboard_shopify_backend/save_general_settings.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => {
+        return response.json();
+      })
+      .then(data => {
+        console.log(data);
+        setIsSaving(false)
+      })
+
+}
 
   return (
-    <Page>
-      <ui-title-bar title="Remix app template">
-        <button variant="primary" onClick={generateProduct}>
-          Generate a product
-        </button>
-      </ui-title-bar>
-      <BlockStack gap="500">
-        <Layout>
-          <Layout.Section>
-            <Card>
-              <BlockStack gap="500">
-                <BlockStack gap="200">
-                  <Text as="h2" variant="headingMd">
-                    Congrats on creating a new Shopify app 🎉
-                  </Text>
-                  <Text variant="bodyMd" as="p">
-                    This embedded app template uses{" "}
-                    <Link
-                      url="https://shopify.dev/docs/apps/tools/app-bridge"
-                      target="_blank"
-                      removeUnderline
-                    >
-                      App Bridge
-                    </Link>{" "}
-                    interface examples like an{" "}
-                    <Link url="/app/additional" removeUnderline>
-                      additional page in the app nav
-                    </Link>
-                    , as well as an{" "}
-                    <Link
-                      url="https://shopify.dev/docs/api/admin-graphql"
-                      target="_blank"
-                      removeUnderline
-                    >
-                      Admin GraphQL
-                    </Link>{" "}
-                    mutation demo, to provide a starting point for app
-                    development.
-                  </Text>
-                </BlockStack>
-                <BlockStack gap="200">
-                  <Text as="h3" variant="headingMd">
-                    Get started with products
-                  </Text>
-                  <Text as="p" variant="bodyMd">
-                    Generate a product with GraphQL and get the JSON output for
-                    that product. Learn more about the{" "}
-                    <Link
-                      url="https://shopify.dev/docs/api/admin-graphql/latest/mutations/productCreate"
-                      target="_blank"
-                      removeUnderline
-                    >
-                      productCreate
-                    </Link>{" "}
-                    mutation in our API references.
-                  </Text>
-                </BlockStack>
-                <InlineStack gap="300">
-                  <Button loading={isLoading} onClick={generateProduct}>
-                    Generate a product
-                  </Button>
-                  {actionData?.product && (
-                    <Button
-                      url={`shopify:admin/products/${productId}`}
-                      target="_blank"
-                      variant="plain"
-                    >
-                      View product
-                    </Button>
-                  )}
-                </InlineStack>
-                {actionData?.product && (
-                  <>
-                    <Text as="h3" variant="headingMd">
-                      {" "}
-                      productCreate mutation
-                    </Text>
-                    <Box
-                      padding="400"
-                      background="bg-surface-active"
-                      borderWidth="025"
-                      borderRadius="200"
-                      borderColor="border"
-                      overflowX="scroll"
-                    >
-                      <pre style={{ margin: 0 }}>
-                        <code>
-                          {JSON.stringify(actionData.product, null, 2)}
-                        </code>
-                      </pre>
-                    </Box>
-                    <Text as="h3" variant="headingMd">
-                      {" "}
-                      productVariantUpdate mutation
-                    </Text>
-                    <Box
-                      padding="400"
-                      background="bg-surface-active"
-                      borderWidth="025"
-                      borderRadius="200"
-                      borderColor="border"
-                      overflowX="scroll"
-                    >
-                      <pre style={{ margin: 0 }}>
-                        <code>
-                          {JSON.stringify(actionData.variant, null, 2)}
-                        </code>
-                      </pre>
-                    </Box>
-                  </>
-                )}
-              </BlockStack>
-            </Card>
-          </Layout.Section>
-          <Layout.Section variant="oneThird">
-            <BlockStack gap="500">
-              <Card>
-                <BlockStack gap="200">
-                  <Text as="h2" variant="headingMd">
-                    App template specs
-                  </Text>
-                  <BlockStack gap="200">
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
-                        Framework
-                      </Text>
-                      <Link
-                        url="https://remix.run"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        Remix
-                      </Link>
-                    </InlineStack>
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
-                        Database
-                      </Text>
-                      <Link
-                        url="https://www.prisma.io/"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        Prisma
-                      </Link>
-                    </InlineStack>
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
-                        Interface
-                      </Text>
-                      <span>
-                        <Link
-                          url="https://polaris.shopify.com"
-                          target="_blank"
-                          removeUnderline
-                        >
-                          Polaris
-                        </Link>
-                        {", "}
-                        <Link
-                          url="https://shopify.dev/docs/apps/tools/app-bridge"
-                          target="_blank"
-                          removeUnderline
-                        >
-                          App Bridge
-                        </Link>
-                      </span>
-                    </InlineStack>
-                    <InlineStack align="space-between">
-                      <Text as="span" variant="bodyMd">
-                        API
-                      </Text>
-                      <Link
-                        url="https://shopify.dev/docs/api/admin-graphql"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        GraphQL API
-                      </Link>
-                    </InlineStack>
-                  </BlockStack>
-                </BlockStack>
-              </Card>
-              <Card>
-                <BlockStack gap="200">
-                  <Text as="h2" variant="headingMd">
-                    Next steps
-                  </Text>
-                  <List>
-                    <List.Item>
-                      Build an{" "}
-                      <Link
-                        url="https://shopify.dev/docs/apps/getting-started/build-app-example"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        {" "}
-                        example app
-                      </Link>{" "}
-                      to get started
-                    </List.Item>
-                    <List.Item>
-                      Explore Shopify’s API with{" "}
-                      <Link
-                        url="https://shopify.dev/docs/apps/tools/graphiql-admin-api"
-                        target="_blank"
-                        removeUnderline
-                      >
-                        GraphiQL
-                      </Link>
-                    </List.Item>
-                  </List>
-                </BlockStack>
-              </Card>
+    <Page 
+      title="Auto Search Settings"
+      secondaryActions={[
+        {
+          content: 'Sync Google Sheet',
+          accessibilityLabel: 'Sync Google Sheet',
+          onAction: () => {
+            // Define the URL to redirect to
+            const url = 'https://auto.searchalytics.com/flextread/fitment-sync/';
+            // Open the URL in a new tab
+            window.open(url, '_blank');
+          },
+        },
+        {
+          content: 'Sync Product Catalog',
+          onAction: () => {
+            // Define the URL to redirect to
+            const url = 'https://auto.searchalytics.com/flextread/setup/fetch-and-manage-database/';
+            // Open the URL in a new tab
+            window.open(url, '_blank');
+          },
+        },
+      ]}
+    >
+      
+      <Layout>
+        
+        <Layout.Section>
+          
+          <Card>
+
+            <BlockStack  gap="200">
+              <div className="Polaris-BlockStack" style={{ }}>
+
+              
+                  <div className="Polaris-BlockStack" style={{ 'width': "50%", '--pc-block-stack-order':'column' , '--pc-block-stack-gap-xs': 'var(--p-space-200)' }} >
+
+                    <h2 class="Polaris-Text--root Polaris-Text--headingMd" style={{ 'fontSize': '16px', 'marginBottom': '2px' }}>Online store dashboard</h2>
+                    <Checkbox
+                      label="Hide Products Until Vehicle Selected"
+                      checked={hideProductsUntilSelected}
+                      onChange={handleChangeHideProductsUntilSelected}
+                    />
+                  
+                    <Checkbox
+                      label="Show Category Images"
+                      checked={showCategoryImages}
+                      onChange={handleChangeShowCategoryImages}
+                    />
+
+                    <Checkbox
+                      label="Show Buttons in Product Cards"
+                      checked={showButtonsInProductCards}
+                      onChange={handleChangeShowButtonsInProductCards}
+                    />
+
+                    <Checkbox
+                      label="Show Brand in Product Cards"
+                      checked={showBrandInProductCards}
+                      onChange={handleChangeShowBrandInProductCards}
+                    />
+
+
+                    <Checkbox
+                      label="Show Reviews in Product Cards"
+                      checked={showReviewsInProductCards}
+                      onChange={handleChangeShowReviewsInProductCards}
+                    />
+                  </div>
+                  <div className="Polaris-BlockStack"  style={{ 'paddingLeft': '50px', 'borderLeft': '1px #eee solid',  'width': "50%", '--pc-block-stack-order':'column' , '--pc-block-stack-gap-xs': 'var(--p-space-200)' }}>
+                  <h2 class="Polaris-Text--root Polaris-Text--headingMd"  style={{ 'fontSize': '16px', 'marginBottom': '2px' }}>Online store dashboard</h2>
+                    <div class="choicelist-horizontal">
+                      <ChoiceList
+                        title="Number of Products in a row"
+                        choices={[
+                          {label: '3', value: '3'},
+                          {label: '4', value: '4'},
+                        ]}
+                        selected={productsPerRow}
+                        onChange={handleChangeInProductsPerRow}
+                      />
+                    </div>
+
+
+                    <div class="choicelist-horizontal">
+                      <ChoiceList
+                        title="Product Card Image Aspect Ratio"
+                        choices={[
+                          { label: 'Default', value: 'default'},
+                          { label: "4:3", value: "4:3" },
+                          { label: "1:1", value: "1:1" }
+                        ]}
+                        selected={productCardImageAspectRatio}
+                        onChange={handleChangeInProductCardImageAspectRatio}
+                      />
+                    </div>
+
+                    <div class="choicelist-horizontal">
+                      <ChoiceList
+                        title="Header Vehicle Icon"
+                        choices={[
+                          { label: 'Garage', value: 'garage'},
+                          { label: "Car", value: "car" },
+                          { label: "Truck", value: "truck" },
+                          { label: "Jeep", value: "jeep" }
+                        ]}
+                        selected={headerVehicleIcon}
+                        onChange={handleChangeInHeaderVehicleIcon}
+                      />
+                    </div>
+                  </div>
+                </div>
             </BlockStack>
-          </Layout.Section>
-        </Layout>
-      </BlockStack>
+            
+            {/* <div style={{marginTop: '15px'}}></div> */}
+
+
+            
+
+          </Card>
+          <div style={{marginTop: '15px'}}></div>
+          <InlineStack align="right" style={{ 'marginTop':'20px' }}>
+
+
+              <Button  className="customButton" disabled={isSaving}  onClick={sendDataToBackend} 
+                variant="primary" accessibilityLabel="Save">
+                {
+                  isSaving
+                    ?  <Spinner size="small" />
+                    : 'Save'
+                }
+              </Button>
+              </InlineStack>
+        </Layout.Section>
+      
+      </Layout>
+    
     </Page>
+  
   );
+
 }
