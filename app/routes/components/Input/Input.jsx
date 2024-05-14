@@ -82,12 +82,9 @@ export const Input = ({ onSubmit,filters,activefilters }) => {
     };
     return (
         <div className="filters-list">
-            <Text variant="headingXl" as="h4">
-                 Available Filters
-            </Text>
-            <Text variant="headingXs" as="h6">
-                Select the options to show as filter.
-            </Text>
+            {/* <Text variant="headingLg" as="h5">
+                 Configure Filters
+            </Text> */}
             
         {/* <div className="options-container">
            <div className="option">

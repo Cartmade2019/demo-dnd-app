@@ -3,7 +3,7 @@ import {TextField} from '@shopify/polaris';
 import "./Modal.css";
 
 
-export const Modal = ({id,title,ids,metakey,onEdit}) => {
+export const Modal = ({id,title,metakey,onEdit}) => {
     const [newtitle, setNewtitle] = useState(title);
     const modalid = "my_modal_"+metakey;
     const input__id = "input"+modalid;
@@ -21,7 +21,7 @@ export const Modal = ({id,title,ids,metakey,onEdit}) => {
     //     []
     //   );
     const handleClosemodal = () =>{
-        document.getElementById(modalid).hide();
+        document.getElementById("editor_modal").hide();
     }
     const handleEdit = (event) => {
         // const tring = event.target.parentNode.previousElementSibling.children.find(el => el.id === input__id).value;               
@@ -48,23 +48,18 @@ export const Modal = ({id,title,ids,metakey,onEdit}) => {
                     );
     return (
     <div className="modal">
-        <ui-modal id={modalid} variant="large" >
+        <ui-modal id="editor_modal" variant="large" >
             <div className="modal-form">
 
                 <TextField label="Field name" value={metakey} disabled autoComplete="off" />
-                <input
-                    type="text"
-                    id={input__id}
-                    label="Display name"
+                <TextField 
+                    label="Field Title" 
                     value={newtitle} 
                     onChange={handletitleChange}
-                    onchange={handletitleChange}
-                    onkeyup={handletitleChange} 
-                    onpaste={handletitleChange} 
-                    oninput={handletitleChange}
                     helpText="The filter name that will be displayed in the filter panel."
-                    autoComplete="off"
-                    />
+                    autoComplete="off" 
+                />
+                
                     
                     
 

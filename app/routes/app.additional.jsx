@@ -32,9 +32,9 @@ export default function AdditionalPage() {
   // ]);
 
   const [filters,setFilters] = useState([]);
-  const [modalfilterid,setModalfilterid] = useState();
-  const [modalfiltertitle,setModalfiltertitle] = useState();
-  const [modalfiltermeta,setModalfiltermeta] = useState();
+  const [modalfilterid,setModalfilterid] = useState("");
+  const [modalfiltertitle,setModalfiltertitle] = useState("");
+  const [modalfiltermeta,setModalfiltermeta] = useState("");
     const [activefilters,setActivefilters] = useState([]);
     const [activefiltersused,setActivefiltersused] = useState([]);
     useEffect(() => {
@@ -80,10 +80,12 @@ export default function AdditionalPage() {
     }
     getmetafields();
 }, []); 
-const triggerModal = (filterId, newTitle) =>{
-  setModalfiltertitle(filterId);
-  setModalfilterid(newTitle);
-  document.getElementById("editmodal").show();
+const triggerModal = (filterId, newTitle,metakey) =>{
+  setModalfiltertitle(newTitle);
+  setModalfilterid(filterId);
+  setModalfiltermeta(metakey);
+  console.log(modalfiltertitle,modalfilterid,modalfiltermeta)
+  document.getElementById("editor_modal").show();
 }
   const updateActiveFilterTitle = (filterId, newTitle) => {
   
@@ -199,11 +201,13 @@ const triggerModal = (filterId, newTitle) =>{
     <Page>
       <ui-title-bar title="Filters" />
       <Layout>
-      <Modal id="editmodal" title={modalfiltertitle}  ids={modalfilterid} metakey={modalfiltermeta} onEdit={updateActiveFilterTitle} />
+      <Modal id={modalfilterid} title={modalfiltertitle}  metakey={modalfiltermeta} onEdit={updateActiveFilterTitle} />
+      <Box background="bg-surface" padding="400" width="700px">
        <DndContext sensors={sensors} onDragEnd={handleDragEnd} collisionDetection={closestCorners}>
-        <Input onSubmit={addTask}  filters={filters} activefilters={activefilters} />
         <Column onRemove={removeTask} activefilters={activefilters} onEdit={updateActiveFilterTitle} triggerModal={triggerModal}/>
+        <Input onSubmit={addTask}  filters={filters} activefilters={activefilters} />
        </DndContext>
+       </Box>
       </Layout>
       
       <ui-modal id="save_success_modal" variant="small" >

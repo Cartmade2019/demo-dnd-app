@@ -14,7 +14,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Modal } from "../Modal/Modal";
 
-export const Task = ({id,title,metakey,onRemove,onEdit,triggerModal}) => {
+export const Task = ({id,title,key,metakey,onRemove,onEdit,triggerModal}) => {
     const handleRemoveItem = (event)=>  {
         const dataname  = event.target.getAttribute('data-name');
         if(dataname){
@@ -37,7 +37,7 @@ export const Task = ({id,title,metakey,onRemove,onEdit,triggerModal}) => {
         //     }
         //     triggerModal={triggerModal}
         // }
-        triggerModal(id,title);
+        triggerModal(id,title,metakey);
     };
     const handlesvgclick = (event)=>  {
         const parentElement = event.target.parentElement;

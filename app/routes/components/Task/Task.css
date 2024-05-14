@@ -3,13 +3,13 @@
     border-radius: 5px;
     box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
     width: 100%;
-    padding: 20px;
+    padding: 5px;
     display: flex;
     align-items: center;
     justify-content: flex-start;
     gap: 20px;
     touch-action: none;
-    cursor: default;
+    cursor: grab;
 }
 .removebutton,.settingsbutton {
     border: none;
@@ -40,6 +40,10 @@
     gap: 20px;
     touch-action: none;
     cursor: default;
+    max-height : 40px;
+}
+.main_list_wrapper span{
+    margin: 0px !important;
 }
 .removebutton svg{
     width:20px
