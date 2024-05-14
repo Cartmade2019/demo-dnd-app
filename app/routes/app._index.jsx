@@ -62,6 +62,7 @@ export default function Index() {
      fetch('https://auto.searchalytics.com/search_auto_dashboard_shopify_backend/send_general_settings.php')
      .then(response => response.json())
      .then(data => {
+        data = data.generalSettings
         setShowCategoryImages(data?.showCategoryImages || showCategoryImages)
         setHideProductsUntilSelected(data?.hideProductsUntilSelected || hideProductsUntilSelected)
         setShowBrandInProductCards(data?.showBrandInProductCards || showBrandInProductCards )
@@ -79,7 +80,6 @@ export default function Index() {
     setIsSaving(true);
 
     const data = {
-
       "showCategoryImages" : showCategoryImages,
       "hideProductsUntilSelected": hideProductsUntilSelected,
       "showBrandInProductCards": showBrandInProductCards,
@@ -88,7 +88,6 @@ export default function Index() {
       "productsPerRow": productsPerRow,
       "productCardImageAspectRatio": productCardImageAspectRatio,
       "headerVehicleIcon": headerVehicleIcon
-
     }
 
     fetch('https://auto.searchalytics.com/search_auto_dashboard_shopify_backend/save_general_settings.php', {
