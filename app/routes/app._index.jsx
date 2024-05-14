@@ -63,6 +63,7 @@ export default function Index() {
      .then(response => response.json())
      .then(data => {
         data = data.generalSettings
+        data = JSON.parse(data)
         setShowCategoryImages(data?.showCategoryImages || showCategoryImages)
         setHideProductsUntilSelected(data?.hideProductsUntilSelected || hideProductsUntilSelected)
         setShowBrandInProductCards(data?.showBrandInProductCards || showBrandInProductCards )
