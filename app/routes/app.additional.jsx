@@ -22,8 +22,15 @@ import {
   CheckCircleIcon
 } from '@shopify/polaris-icons';
 import { Modal } from "./components/Modal/Modal";
+import { useLoaderData } from "@remix-run/react";
+import { authenticate } from "../shopify.server";
 // import "./list.css";
 
+export const loader = async ({ request }) => {
+  const { admin, session } = await authenticate.admin(request);
+      const { shop } = session;
+  return shop;
+  };
 export default function AdditionalPage() {
   // const [tasks,setTasks] = useState([
   //   {id:1,title:"Price",metakey:'price'},
@@ -37,11 +44,16 @@ export default function AdditionalPage() {
   const [modalfiltermeta,setModalfiltermeta] = useState("");
     const [activefilters,setActivefilters] = useState([]);
     const [activefiltersused,setActivefiltersused] = useState([]);
+    const shop = useLoaderData();
+  console.log("shop",shop);
     useEffect(() => {
     const getmetafields = () => {
         const requestOptions = {
             method: "GET",
-            redirect: "follow"
+            redirect: "follow",
+            headers: {
+              "Shop-Name" : shop
+            }
           };
             
             fetch("https://auto.searchalytics.com/search_auto_dashboard_shopify_backend/filters/send_all_metafields.php?shopify_store=flextread", requestOptions)
@@ -176,6 +188,7 @@ const triggerModal = (filterId, newTitle,metakey) =>{
     });
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
+    myHeaders.append("Shop-Name", shop);
 
     const raw = JSON.stringify(dataToSend);
 
@@ -229,5 +242,4 @@ const triggerModal = (filterId, newTitle,metakey) =>{
     </Page>
   );
 }
-
 

@@ -16,9 +16,15 @@ import {
   ChoiceList,
   Card
 } from "@shopify/polaris";
-
+import { useLoaderData } from "@remix-run/react";
+import { authenticate } from "../shopify.server";
 import './_index/styles.module.css';
 
+export const loader = async ({ request }) => {
+  const { admin, session } = await authenticate.admin(request);
+      const { shop } = session;
+  return shop;
+  };
 
 export default function Index() {
   
@@ -41,7 +47,8 @@ export default function Index() {
   const handleChangeInProductsPerRow = (value) => {setProductsPerRow(value)};
   const handleChangeInProductCardImageAspectRatio = (value) => {setProductCardImageAspectRatio(value)};
   const handleChangeInHeaderVehicleIcon = (value) => {setHeaderVehicleIcon(value)};
- 
+  const shop = useLoaderData();
+  console.log("shop",shop); 
   useEffect(() => {
 
       const blockStacks = document.querySelectorAll('.Polaris-BlockStack--listReset');
@@ -59,7 +66,11 @@ export default function Index() {
         fieldSet.style.marginTop = '5px'
       })
 
-     fetch('https://auto.searchalytics.com/search_auto_dashboard_shopify_backend/send_general_settings.php')
+     fetch('https://auto.searchalytics.com/search_auto_dashboard_shopify_backend/send_general_settings.php',{
+      headers: {
+        "Shop-Name" : shop
+      },
+     })
      .then(response => response.json())
      .then(data => {
         data = data.generalSettings
@@ -94,7 +105,8 @@ export default function Index() {
     fetch('https://auto.searchalytics.com/search_auto_dashboard_shopify_backend/save_general_settings.php', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          "Shop-Name" : shop
         },
         body: JSON.stringify(data)
       })

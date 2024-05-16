@@ -3,6 +3,7 @@ import db from "../db.server";
 
 export const action = async ({ request }) => {
   const { topic, shop, session, admin } = await authenticate.webhook(request);
+  console.log("Session data",session);
 
   if (!admin) {
     // The admin context isn't returned if the webhook fired after a shop was uninstalled.

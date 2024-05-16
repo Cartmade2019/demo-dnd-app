@@ -3,7 +3,7 @@
 client_id = "251bd1f080d3e8566e4fe283bfc7ab9f"
 name = "filters-test"
 handle = "searchauto-dashboard"
-application_url = "https://expect-burlington-booking-ensure.trycloudflare.com"
+application_url = "https://open-recorder-austria-subsequently.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://expect-burlington-booking-ensure.trycloudflare.com/auth/callback",
-  "https://expect-burlington-booking-ensure.trycloudflare.com/auth/shopify/callback",
-  "https://expect-burlington-booking-ensure.trycloudflare.com/api/auth/callback"
+  "https://open-recorder-austria-subsequently.trycloudflare.com/auth/callback",
+  "https://open-recorder-austria-subsequently.trycloudflare.com/auth/shopify/callback",
+  "https://open-recorder-austria-subsequently.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
