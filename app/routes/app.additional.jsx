@@ -52,7 +52,7 @@ export default function AdditionalPage() {
             method: "GET",
             redirect: "follow",
             headers: {
-              "Shop-Name" : shop
+              "shop-name" : shop
             }
           };
             
@@ -188,7 +188,7 @@ const triggerModal = (filterId, newTitle,metakey) =>{
     });
     const myHeaders = new Headers();
     myHeaders.append("Content-Type", "application/json");
-    myHeaders.append("Shop-Name", shop);
+    myHeaders.append("shop-name", shop);
 
     const raw = JSON.stringify(dataToSend);
 

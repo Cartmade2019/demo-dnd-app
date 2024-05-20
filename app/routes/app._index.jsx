@@ -68,7 +68,7 @@ export default function Index() {
 
      fetch('https://auto.searchalytics.com/search_auto_dashboard_shopify_backend/send_general_settings.php',{
       headers: {
-        "Shop-Name" : shop
+        "shop-name" : shop
       },
      })
      .then(response => response.json())
@@ -106,7 +106,7 @@ export default function Index() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          "Shop-Name" : shop
+          "shop-name" : shop
         },
         body: JSON.stringify(data)
       })
