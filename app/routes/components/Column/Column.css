@@ -21,3 +21,13 @@
 .success_message svg{
     fill: green !important;
 }
+#configure-filter-block{
+    flex-direction: column;
+    width: 700px;
+}
+#configurations-save{
+    margin-right: 0px;
+}
+#configuration-page-title{
+    padding-bottom: 10px;
+}
