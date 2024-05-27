@@ -212,15 +212,22 @@ const triggerModal = (filterId, newTitle,metakey) =>{
   }
   return (
     <Page>
-      <ui-title-bar title="Filters" />
+      {/* <ui-title-bar title="Filters" /> */}
       <Layout>
       <Modal id={modalfilterid} title={modalfiltertitle}  metakey={modalfiltermeta} onEdit={updateActiveFilterTitle} />
-      <Box background="bg-surface" padding="400" width="700px">
+      <Text variant="headingLg" as="h1">
+        Filters
+      </Text>
+      <Box background="bg-surface" padding="400" width="700px" borderRadius="100">
        <DndContext sensors={sensors} onDragEnd={handleDragEnd} collisionDetection={closestCorners}>
         <Column onRemove={removeTask} activefilters={activefilters} onEdit={updateActiveFilterTitle} triggerModal={triggerModal}/>
         <Input onSubmit={addTask}  filters={filters} activefilters={activefilters} />
        </DndContext>
        </Box>
+       <PageActions
+        primaryAction={<Button variant="primary" onBlur={handleSubmitData}>
+              Save</Button>}
+        />
       </Layout>
       
       <ui-modal id="save_success_modal" variant="small" >
@@ -235,10 +242,10 @@ const triggerModal = (filterId, newTitle,metakey) =>{
                 <button onClick={handleSave}>OK</button>
             </ui-title-bar>
         </ui-modal>
-      <PageActions
+      {/* <PageActions
         primaryAction={<Button variant="primary" onBlur={handleSubmitData}>
           Save</Button>}
-    />
+    /> */}
     </Page>
   );
 }
