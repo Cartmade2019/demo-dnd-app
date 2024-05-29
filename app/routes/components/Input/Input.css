@@ -35,6 +35,7 @@
     display: inline-block;
     position: relative;
     width: max-content;
+    z-index: 9;
   }
   
   .dd-button {
