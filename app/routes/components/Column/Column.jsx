@@ -3,7 +3,7 @@ import './Column.css';
 import {SortableContext,verticalListSortingStrategy,} from "@dnd-kit/sortable";
 import { Task } from "../Task/Task";
 import {Text} from '@shopify/polaris';
-
+import { Input } from "./Input/Input";
 export const Column = ({ onRemove,activefilters,onEdit,triggerModal,onSubmit,filters }) => {
     return (
         <div className="column-wrap">
