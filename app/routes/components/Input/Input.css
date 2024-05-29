@@ -90,6 +90,10 @@
   
   .dd-input:checked + .dd-menu {
     display: block;
+    max-height: 300px;
+    overflow: auto;
+    left: auto;
+    right: 0;
   } 
   
   .dd-menu li {
