@@ -220,8 +220,8 @@ const triggerModal = (filterId, newTitle,metakey) =>{
       <Modal id={modalfilterid} title={modalfiltertitle}  metakey={modalfiltermeta} onEdit={updateActiveFilterTitle} />
       <Box background="bg-surface" padding="400" width="700px" borderRadius="150">
        <DndContext sensors={sensors} onDragEnd={handleDragEnd} collisionDetection={closestCorners}>
-        <Column onRemove={removeTask} activefilters={activefilters} onEdit={updateActiveFilterTitle} triggerModal={triggerModal}/>
-        <Input onSubmit={addTask}  filters={filters} activefilters={activefilters} />
+        <Column onRemove={removeTask} activefilters={activefilters} onEdit={updateActiveFilterTitle} triggerModal={triggerModal} addTask={addTask} filters={filters}/>
+        {/* <Input onSubmit={addTask}  filters={filters} activefilters={activefilters} /> */}
        </DndContext>
        </Box>
        <div className="page-actions-wrap">
