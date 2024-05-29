@@ -4,14 +4,14 @@ import {SortableContext,verticalListSortingStrategy,} from "@dnd-kit/sortable";
 import { Task } from "../Task/Task";
 import {Text} from '@shopify/polaris';
 
-export const Column = ({ onRemove,activefilters,onEdit,triggerModal,addTask,filters }) => {
+export const Column = ({ onRemove,activefilters,onEdit,triggerModal,onSubmit,filters }) => {
     return (
         <div className="column-wrap">
             <div className="column_headers">
                 <Text variant="headingLg" as="h5">
                     Configure Filters
                 </Text>
-                <Input onSubmit={addTask}  filters={filters} activefilters={activefilters} />
+                <Input onSubmit={onSubmit}  filters={filters} activefilters={activefilters} />
             </div>
         
         
