@@ -129,7 +129,7 @@ export default function Index() {
           accessibilityLabel: 'Sync Google Sheet',
           onAction: () => {
             // Define the URL to redirect to
-            const url = 'https://auto.searchalytics.com/search_auto_dashboard_shopify_backend/fitment-sync/?'+shop;
+            const url = 'https://auto.searchalytics.com/search_auto_dashboard_shopify_backend/fitment-sync/?shop-name='+shop;
             // Open the URL in a new tab
             window.open(url, '_blank');
           },
@@ -138,7 +138,7 @@ export default function Index() {
           content: 'Sync Product Catalog',
           onAction: () => {
             // Define the URL to redirect to
-            const url = 'https://auto.searchalytics.com/search_auto_dashboard_shopify_backend/fetch-and-manage-database/?'+shop;
+            const url = 'https://auto.searchalytics.com/search_auto_dashboard_shopify_backend/fetch-and-manage-database/?shop-name='+shop;
             // Open the URL in a new tab
             window.open(url, '_blank');
           },
